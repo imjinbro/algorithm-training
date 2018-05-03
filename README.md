@@ -144,3 +144,112 @@
   * - 면 다 넘겨두고, 맥스값 찾아서 체커를 만드는데(0인덱스 무시를 위해 +1) 맥스값이 -인 경우 1개만 만들어서 나중에 체크할 땐 1만 빠졌다고 체크하면 될 듯
   * 발견되지않는 상황과 모두 음수일 때에 대한 처리를 해야함
   * 공간복잡도가 O(N)이므로 N개의 숫자가 주어졌을 때 O(N)까지 체커를 만들어도 상관없음
+  
+# 0503
+## 풀면서...
+* 복잡도, 조건 그대로 힌트
+* while - for 중첩도 결국 반복 중첩
+* **이중반복문을 생각했다면 이중반복문이 왜 필요한지 반복문 하나로 줄여놓고 루프 돌면서 어떤걸 파악하고 적용해야하는지 생각하기**
+  
+## Counting Elements - MaxCounters
+  
+~~~
+public int[] solution(int N, int A[], int M);
+  
+You are given N counters, initially set to 0, and you have two possible operations on them:
+
+increase(X) − counter X is increased by 1,
+max counter − all counters are set to the maximum value of any counter.
+A non-empty array A of M integers is given. This array represents consecutive operations:
+
+if A[K] = X, such that 1 ≤ X ≤ N, then operation K is increase(X),
+if A[K] = N + 1 then operation K is max counter.
+~~~
+  
+* A[]를 순회함 -> A[i]에 해당하는 자리(counter[])에 +1을 함, N+1일 때 모든 자리에 카운트 +1
+  * 시간복잡도 : O(N+M)
+  * 공간복잡도 : O(N)
+
+* 아이디어 생각나는대로 시도해보기
+  
+~~~
+public static int[] solution1(int N, int[] A) {
+	int[] counter = new int[N];
+
+	int currentIdx = -1;
+	boolean isAllCheck = false;
+	while (currentIdx < A.length-1) {
+		for (int i = currentIdx + 1; i < A.length; i++) {
+		currentIdx = i;
+		int idx = A[i] - 1;
+		if (A[i] > N) {
+			isAllCheck = true;
+			break;
+		}
+			counter[idx]++;
+		}
+
+		if (isAllCheck) {
+			int maxValue = 0;
+			for (int value : counter) {
+			if (maxValue < value) {
+				maxValue = value;
+			}
+		}
+
+			for (int i = 0; i< counter.length; i++) {
+				counter[i] = maxValue;
+			}
+			isAllCheck = false;
+		}
+	}
+	return counter;
+}
+~~~
+  
+* 일단 기능은 됨, 그러나 O(M*N)으로 사실상 N^2, while 반복문도 결국 반복문 중첩으로 N^2 퍼포먼스에서 점수가 40%
+* AllCheck 부분을 어떻게 처리할지가 관건 : 나머지는 해당 자리에 카운트만 해주면 되지만 범위 벗어난다면 모두에 가장 큰 값을 처리해야함
+  
+* N+1 지점을 미리 찾아둔다(int) -> 해당 인덱스까지 가장 많은 빈도수를 찾는다 -> 카운트에 그 빈도수로 모두 교체한다 -> 해당 인덱스가 마지막이 아니라면 해당 지점 이후(+1)부터 A[i]를 꺼내서 카운팅하는 작업을 한다
+  * N+1 지점이 한번 나오는건가? 아님 예제 상황만 있는게 아님
+  
+* 바로 그자리에서 모두 +1 하지말고 max 저장해뒀다가 해당값에 못미칠 때 그 값으로?
+  * 기록되면서 자기값과 비교했을 때 크다면 tempMax에 기록하기?
+  * 한번 할 때마다 어디에 기록해뒀다가 실제로 사용하면 되겠음 : 이중루프를 도는 이유가 그거였는데..
+  * maxCount Operation 전인지 후인지에 따라 값을 어떻게 + 시킬지가 바뀜 : ++할지 max + 1 할지
+  * **기록해뒀다가 나중에 못미칠 때 적용시킨다는게 중요** 
+
+~~~
+class Solution {
+    public int[] solution(int N, int[] A) {
+        int[] counter = new int[N];        
+        int max = 0;
+        int tempMax = 0;
+        for (int i = 0; i < A.length; i++) {
+            int X = A[i];
+            if (1 <= X && X <= N) {
+                if (counter[X-1] < max) {
+                    counter[X-1] = max + 1;    
+                } else { 
+                    counter[X-1]++;
+                }
+                
+                if(counter[X-1] > tempMax) {
+                    tempMax = counter[X-1];
+                }
+            } else {
+                max = tempMax;    
+            }
+        }
+        
+        for (int i = 0; i < counter.length; i++) {
+            if (counter[i] < max) {
+                counter[i] = max;
+            }
+        }
+        return counter;
+    }
+}
+~~~
+  
+* O(N+M) 시간복잡도가 힌트....
