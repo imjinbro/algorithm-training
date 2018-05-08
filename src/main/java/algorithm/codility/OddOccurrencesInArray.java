@@ -1,4 +1,4 @@
-package algorithm;
+package algorithm.codility;
 
 import java.util.Arrays;
 /*
