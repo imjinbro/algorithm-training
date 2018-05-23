@@ -7,32 +7,19 @@ public class Q8958 {
         Scanner sc = new Scanner(System.in);
         int N = Integer.parseInt(sc.nextLine());
 
-        int cnt = 0;
-        int start = 0;
-        int end = -1;
-        int continueNum = 0;
-
-        for (int num = 0; num < N; num++) {
+        for (int i = 0; i < N; i++) {
             char[] data = sc.nextLine().toCharArray();
-            for(int i = 0; i < data.length; i++) {
-                if (data[i] == 'O') {
-                    if (start >= end) {
-                        start = i;
-                    }
-
-                    if (i == data.length - 1) {
-                        end = i;
-                    }
+            int cnt = 0;
+            int sum = 0;
+            for (char ch : data) {
+                if (ch == 'O') {
+                    cnt++;
+                    sum += cnt;
                 } else {
-                    end = i - 1;
-                }
-
-                if (start <= end) {
-                    cnt += continueNum;
-                    continueNum = 0;
+                    cnt = 0;
                 }
             }
-            System.out.println(cnt);
+            System.out.println(sum);
         }
     }
 }
